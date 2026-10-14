@@ -914,3 +914,22 @@ class TestAuthAPIHandler(TestAppBaseAuth):
                 "error": "Username test1 is already taken",
                 "status": 400,
             }
+
+    def test_student_cannot_list_users(self):
+        """A read-only student cannot retrieve all user accounts."""
+        student = User(
+            name="Student",
+            username=READ_USER_NAME,
+            password="test",
+            role=Role.READ,
+            id=READ_USER_ID,
+        )
+
+        with self._authenticate_as(student):
+            response = self.fetch_with_auth(
+                "/api/v1/auth/users",
+                method="GET",
+            )
+
+        assert response.code == 403
+        assert "users" not in json.loads(response.body)
